@@ -17,14 +17,14 @@ const authenticatedUser = (username,password)=>{ //returns boolean
 regd_users.post("/login", (req,res) => {
   //Write your code here
   users.forEach(element => {
-    if(element.username == req.query.username && element.password == req.query.password)
+    if(element.username == req.body.username && element.password == req.body.password)
     {
         let accessToken = jwt.sign({data: element.password}, 'access', { expiresIn: 60 * 60 });
         let username = element.username;
         req.session.authorization = {
             accessToken,username
         }    
-        return res.send("OK");
+        return res.send("Customer succesfully login");
     }
   });
   return res.status(300).json({message: "User does not exist"});
@@ -33,29 +33,19 @@ regd_users.post("/login", (req,res) => {
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
   //Write your code here
-  for(i = 1;i<=10;i++)
-  {
-    if(books[i].ISBN==req.params.isbn)
-    {
-        let newreview = {"user":"erick","review":req.query.review}
-        books[i].review=newreview;
-        return res.send("new review added " + req.query.review);
-   }
-  }
+  let newreview = {"user":req.session.authorization.username,"review":req.query.review}
+  books[req.params.isbn].review=newreview;
+  return res.send("The review for the book with ISBN " + req.params.isbn + " has been added/updated");
   return res.status(300).json({message: "Yet to be implemented"});
 });
 
 regd_users.delete("/auth/review/:isbn", (req, res) => {
     //Write your code here
-    for(i = 1;i<=10;i++)
-    {
-      if(books[i].ISBN==req.params.isbn)
-      {
-          let newreview = {}
-          books[i].review=newreview;
-          return res.send("review deleted ");
-     }
-    }
+
+    let newreview = {}
+    books[req.params.isbn].review=newreview;
+    return res.send("Reviews of the ISBN " + req.params.isbn + "posted by the user " + req.session.authorization.username + " deleted");
+
     return res.status(300).json({message: "Yet to be implemented"});
   });
 
